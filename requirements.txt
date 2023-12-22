@@ -2,5 +2,4 @@ python==3.9
 streamlit
 numpy
 plotly.graph_objects
-pydub
-tempfile
+
