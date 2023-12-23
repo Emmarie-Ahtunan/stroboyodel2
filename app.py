@@ -9,18 +9,6 @@ def generate_sine_wave(x, frequency, amplitude, phase=0.0):
 # Set up the Streamlit app
 st.title('Interactive Sine Wave Animation')
 
-
-import streamlit as st
-import numpy as np
-import plotly.graph_objects as go
-
-# Function to generate sine wave
-def generate_sine_wave(x, frequency, amplitude, phase):
-    return amplitude * np.sin(frequency * x + phase)
-
-# Set up the Streamlit app
-st.title('Interactive Sine Wave Animation')
-
 # Explanation on the sidebar
 st.sidebar.title('Explanation')
 st.sidebar.write("""
@@ -64,7 +52,6 @@ fig.update_layout(
     xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'),
     width=800, height=500,  # Set the width and height of the graph
     margin=dict(l=20, r=20, t=40, b=20),  # Adjust margin 
-    paper_bgcolor="lightgray",  # Set background color
 )
 
 # Display the animated plot in the center of the main content area
