@@ -1,4 +1,4 @@
-# Stroboyodel
+# [Stroboyodel](https://stroboyodel2-suzj3dc5trgbzv98zsjwrb.streamlit.app/?fbclid=IwAR157xAQipBglVgWFKNZCizGFQV1kjdA_Pi14juT1mFTbc6uZ-icUHsK86I)
 
 <img width="755" alt="Sine Wave Animation Image" src="https://github.com/Emmarie-Ahtunan/stroboyodel2/assets/86572370/7ea44bf9-b14b-4be0-90b6-a1c56eb4282c">
 
