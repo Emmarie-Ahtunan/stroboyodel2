@@ -3,7 +3,7 @@ import numpy as np
 import plotly.graph_objects as go
 
 # Function to generate sine wave
-def generate_sine_wave(x, frequency, amplitude, phase):
+def generate_sine_wave(x, frequency, amplitude, phase=0.0):
     return amplitude * np.sin(frequency * x + phase)
 
 # Set up the Streamlit app
@@ -11,10 +11,30 @@ st.title('Interactive Sine Wave Animation')
 
 # Introduction
 st.write("""
-Welcome to the Interactive Sine Wave Animation tutorial! This tutorial will guide you through exploring different parameters of a sine wave using sliders.
+Welcome to the Interactive Sine Wave Animation tutorial! This tutorial will guide you through exploring different parameters of a sine wave using sliders and user inputs.
 
 Let's get started!
 """)
+
+# User input for multiple frequencies
+selected_frequencies = st.multiselect('Select Frequencies (Hz)', [1.0, 2.0, 3.0], [1.0, 2.0])
+
+# User input for amplitude
+amplitude = st.slider('Select Amplitude', 0.1, 2.0, 1.0, step=0.1)
+
+# Create the plot
+x = np.linspace(0, 2 * np.pi, 1000)
+fig = go.Figure()
+
+# Initial plot with default frequencies
+y = sum([generate_sine_wave(x, freq, amplitude) for freq in selected_frequencies])
+fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Combined Sine Wave'))
+
+fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude}, Frequencies={selected_frequencies})',
+                  xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
+
+# Display the animated plot
+plotly_chart = st.plotly_chart(fig, use_container_width=True)
 
 # Educational Questions
 questions = [
@@ -30,13 +50,7 @@ questions = [
     "How does altering the phase affect the interference of multiple sine waves?"
 ]
 
-# Create the plot
-x = np.linspace(0, 2 * np.pi, 1000)
-fig = go.Figure()
-fig.update_layout(title='Sine Wave Animation', xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
-chart = st.plotly_chart(fig, use_container_width=True)
-
-# Tutorial for each question
+# Create the animated plot with Plotly Express
 for i, question in enumerate(questions, start=1):
     unique_id = f"{i}_{question.replace(' ', '')}"  # Create a unique ID without underscores
     
@@ -44,31 +58,29 @@ for i, question in enumerate(questions, start=1):
     st.sidebar.write(f"In this step, we'll explore the following question:\n\n*{question}*")
 
     # Sliders for interaction
-    amplitude_slider = st.sidebar.slider('Select Amplitude', 0.1, 2.0, 1.0, step=0.1, key=f'amplitude_slider_{unique_id}')
-    frequency_slider = st.sidebar.slider('Select Frequency (Hz)', 1.0, 10.0, 1.0, step=0.1, key=f'frequency_slider_{unique_id}')
     phase_slider = st.sidebar.slider('Select Phase', 0.0, 2*np.pi, 0.0, step=0.1, key=f'phase_slider_{unique_id}')
     num_frames_slider = st.sidebar.slider('Number of Frames', 1, 100, 30, key=f'num_frames_slider_{unique_id}')
 
     # Generate data for the animation frame
-    frame = generate_sine_wave(x, frequency_slider, amplitude_slider, phase_slider)
+    y = sum([generate_sine_wave(x, freq, amplitude, phase_slider) for freq in selected_frequencies])
 
     # Update the plot for the current step
     fig.data = []  # Clear previous traces
-    fig.add_trace(go.Scatter(x=x, y=frame, mode='lines', name='Sine Wave'))
-    fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude_slider}, Frequency={frequency_slider}, Phase={phase_slider})',
+    fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Combined Sine Wave'))
+    fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude}, Frequencies={selected_frequencies}, Phase={phase_slider})',
                       xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
 
     # Update the chart in the main content area
-    chart.plotly_chart(fig)
+    plotly_chart.plotly_chart(fig)
 
     # Next Step button
-    if st.sidebar.button(f'Next Step {i}'):
-        st.sidebar.success(f'Step {i} completed! Move on to the next step.')
+    if i < len(questions):
+        if st.sidebar.button(f'Next Step {i}'):
+            st.sidebar.success(f'Step {i} completed! Move on to the next step.')
+    else:
+        if st.sidebar.button(f'Finish Tutorial'):
+            st.sidebar.success('Congratulations! You\'ve completed the tutorial.')
 
-# End of the tutorial
-st.write("""
-Congratulations! You've completed the Interactive Sine Wave Animation tutorial. Feel free to ask any additional questions or explore the app further.
-""")
 
 
 
