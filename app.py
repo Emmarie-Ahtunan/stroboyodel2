@@ -30,35 +30,48 @@ questions = [
     "How does altering the phase affect the interference of multiple sine waves?"
 ]
 
+# Create the plot
+x = np.linspace(0, 2 * np.pi, 1000)
+fig = go.Figure()
+fig.update_layout(title='Sine Wave Animation', xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
+chart = st.plotly_chart(fig, use_container_width=True)
+
 # Tutorial for each question
 for i, question in enumerate(questions, start=1):
-    unique_id = f"{i}_{question.replace(' ', '_')}"  # Create a unique ID based on question and index
+    unique_id = f"{i}_{question.replace(' ', '')}"  # Create a unique ID without underscores
     
     st.sidebar.subheader(f'Step {i}: {question}')
     st.sidebar.write(f"In this step, we'll explore the following question:\n\n*{question}*")
 
     # Sliders for interaction
-    amplitude_slider = st.sidebar.slider(f'Select Amplitude {unique_id}', 0.1, 2.0, 1.0, step=0.1)
-    frequency_slider = st.sidebar.slider(f'Select Frequency {unique_id}', 1.0, 10.0, 1.0, step=0.1)
-    phase_slider = st.sidebar.slider(f'Select Phase {unique_id}', 0.0, 2*np.pi, 0.0, step=0.1)
-    num_frames_slider = st.sidebar.slider(f'Number of Frames {unique_id}', 1, 100, 30)
+    amplitude_slider = st.sidebar.slider('Select Amplitude', 0.1, 2.0, 1.0, step=0.1, key=f'amplitude_slider_{unique_id}')
+    frequency_slider = st.sidebar.slider('Select Frequency (Hz)', 1.0, 10.0, 1.0, step=0.1, key=f'frequency_slider_{unique_id}')
+    phase_slider = st.sidebar.slider('Select Phase', 0.0, 2*np.pi, 0.0, step=0.1, key=f'phase_slider_{unique_id}')
+    num_frames_slider = st.sidebar.slider('Number of Frames', 1, 100, 30, key=f'num_frames_slider_{unique_id}')
 
     # Generate data for the animation frame
-    x = np.linspace(0, 2 * np.pi, 1000)
     frame = generate_sine_wave(x, frequency_slider, amplitude_slider, phase_slider)
 
-    # Create the plot for the current step
-    fig = go.Figure()
+    # Update the plot for the current step
+    fig.data = []  # Clear previous traces
     fig.add_trace(go.Scatter(x=x, y=frame, mode='lines', name='Sine Wave'))
     fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude_slider}, Frequency={frequency_slider}, Phase={phase_slider})',
                       xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
-    st.plotly_chart(fig, use_container_width=True)
 
+    # Update the chart in the main content area
+    chart.plotly_chart(fig)
+
+    # Next Step button
+    if st.sidebar.button(f'Next Step {i}'):
+        st.sidebar.success(f'Step {i} completed! Move on to the next step.')
 
 # End of the tutorial
 st.write("""
 Congratulations! You've completed the Interactive Sine Wave Animation tutorial. Feel free to ask any additional questions or explore the app further.
 """)
+
+
+
 
 
 
