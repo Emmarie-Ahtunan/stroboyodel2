@@ -62,10 +62,6 @@ fig.update_layout(
 st.plotly_chart(fig, use_container_width=True)
 
 
-# Display the animated plot
-st.plotly_chart(fig)
-
-
 
 
 
