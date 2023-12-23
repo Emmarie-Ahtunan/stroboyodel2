@@ -9,78 +9,66 @@ def generate_sine_wave(x, frequency, amplitude, phase=0.0):
 # Set up the Streamlit app
 st.title('Interactive Sine Wave Animation')
 
-# Introduction
-st.write("""
-Welcome to the Interactive Sine Wave Animation tutorial! This tutorial will guide you through exploring different parameters of a sine wave using sliders and user inputs.
 
-Let's get started!
+import streamlit as st
+import numpy as np
+import plotly.graph_objects as go
+
+# Function to generate sine wave
+def generate_sine_wave(x, frequency, amplitude, phase):
+    return amplitude * np.sin(frequency * x + phase)
+
+# Set up the Streamlit app
+st.title('Interactive Sine Wave Animation')
+
+# Explanation on the sidebar
+st.sidebar.title('Explanation')
+st.sidebar.write("""
+This Streamlit app generates an interactive animation of a sine wave. 
+Adjust the sliders to explore different parameters and observe the changes in the animated sine wave.
+- **Time:** Determines the position in time, influencing the phase of the sine wave.
+- **Frequency 1, 2, 3:** Controls the frequencies of three sine waves.
+- **Amplitude:** Adjusts the amplitude of the sine wave, determining its height.
+- **Phase:** Modifies the phase of the sine wave, influencing its starting point.
+- **Number of Frames:** Specifies the duration of the animation by setting the number of frames.
+The animated sine wave is visualized using Plotly.
 """)
 
-# User input for multiple frequencies
-selected_frequencies = st.multiselect('Select Frequencies (Hz)', [1.0, 2.0, 3.0], [1.0, 2.0])
+# Create sliders on the sidebar
+time_slider = st.sidebar.slider('Select Time (seconds)', 0.0, 10.0, 5.0, step=0.1, key='time_slider')
+frequency_slider1 = st.sidebar.slider('Select Frequency 1 (Hz)', 1.0, 10.0, 1.0, step=0.1, key='frequency_slider1')
+frequency_slider2 = st.sidebar.slider('Select Frequency 2 (Hz)', 1.0, 10.0, 2.0, step=0.1, key='frequency_slider2')
+frequency_slider3 = st.sidebar.slider('Select Frequency 3 (Hz)', 1.0, 10.0, 3.0, step=0.1, key='frequency_slider3')
+amplitude_slider = st.sidebar.slider('Select Amplitude', 0.1, 2.0, 1.0, step=0.1, key='amplitude_slider')
+phase_slider = st.sidebar.slider('Select Phase', 0.0, 2*np.pi, 0.0, step=0.1, key='phase_slider')
+num_frames_slider = st.sidebar.slider('Number of Frames', 1, 100, 30, key='num_frames_slider')
 
-# User input for amplitude
-amplitude = st.slider('Select Amplitude', 0.1, 2.0, 1.0, step=0.1)
-
-# Create the plot
+# Generate data for the animation frames
 x = np.linspace(0, 2 * np.pi, 1000)
-fig = go.Figure()
-
-# Initial plot with default frequencies
-y = sum([generate_sine_wave(x, freq, amplitude) for freq in selected_frequencies])
-fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Combined Sine Wave'))
-
-fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude}, Frequencies={selected_frequencies})',
-                  xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
-
-# Display the animated plot
-plotly_chart = st.plotly_chart(fig, use_container_width=True)
-
-# Educational Questions
-questions = [
-    "What is the effect of changing the amplitude of the sine wave?",
-    "How does adjusting the phase impact the sine wave?",
-    "What happens when you increase the frequency of the sine wave?",
-    "How does changing the time parameter affect the animated sine wave?",
-    "What is the role of the number of frames in the animation?",
-    "Can you create a standing wave by combining multiple sine waves?",
-    "How does the animation respond to simultaneous changes in amplitude and frequency?",
-    "What is the impact of increasing the number of frames on animation quality?",
-    "What happens when you set all frequencies to the same value?",
-    "How does altering the phase affect the interference of multiple sine waves?"
+frames = [
+    generate_sine_wave(x, frequency_slider1, amplitude_slider, phase_slider + time_slider),
+    generate_sine_wave(x, frequency_slider2, amplitude_slider, phase_slider + time_slider),
+    generate_sine_wave(x, frequency_slider3, amplitude_slider, phase_slider + time_slider)
 ]
 
 # Create the animated plot with Plotly Express
-for i, question in enumerate(questions, start=1):
-    unique_id = f"{i}_{question.replace(' ', '')}"  # Create a unique ID without underscores
-    
-    st.sidebar.subheader(f'Step {i}: {question}')
-    st.sidebar.write(f"In this step, we'll explore the following question:\n\n*{question}*")
+fig = go.Figure()
+for i in range(num_frames_slider):
+    t = i / (num_frames_slider - 1)  # Normalize time from 0 to 1
+    combined_frame = sum([frame * np.sin(t * np.pi + np.pi/2) for frame in frames])  # Combine frames with a sine function
+    fig.add_trace(go.Scatter(x=x, y=combined_frame, mode='lines', name=f'Frame {i+1}'))
 
-    # Sliders for interaction
-    phase_slider = st.sidebar.slider('Select Phase', 0.0, 2*np.pi, 0.0, step=0.1, key=f'phase_slider_{unique_id}')
-    num_frames_slider = st.sidebar.slider('Number of Frames', 1, 100, 30, key=f'num_frames_slider_{unique_id}')
+# Update layout to center the graph
+fig.update_layout(
+    title=f'Sine Wave Animation (Amplitude={amplitude_slider}, Phase={phase_slider}, Time={time_slider} seconds)',
+    xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'),
+    width=800, height=500,  # Set the width and height of the graph
+    margin=dict(l=20, r=20, t=40, b=20),  # Adjust margin 
+    paper_bgcolor="lightgray",  # Set background color
+)
 
-    # Generate data for the animation frame
-    y = sum([generate_sine_wave(x, freq, amplitude, phase_slider) for freq in selected_frequencies])
-
-    # Update the plot for the current step
-    fig.data = []  # Clear previous traces
-    fig.add_trace(go.Scatter(x=x, y=y, mode='lines', name='Combined Sine Wave'))
-    fig.update_layout(title=f'Sine Wave Animation (Amplitude={amplitude}, Frequencies={selected_frequencies}, Phase={phase_slider})',
-                      xaxis=dict(title='Time (seconds)'), yaxis=dict(title='Amplitude'))
-
-    # Update the chart in the main content area
-    plotly_chart.plotly_chart(fig)
-
-    # Next Step button
-    if i < len(questions):
-        if st.sidebar.button(f'Next Step {i}'):
-            st.sidebar.success(f'Step {i} completed! Move on to the next step.')
-    else:
-        if st.sidebar.button(f'Finish Tutorial'):
-            st.sidebar.success('Congratulations! You\'ve completed the tutorial.')
-
+# Display the animated plot in the center of the main content area
+st.plotly_chart(fig, use_container_width=True)
 
 
 
